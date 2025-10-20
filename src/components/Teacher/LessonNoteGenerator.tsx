@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Save, Download } from 'lucide-react';
+import { Sparkles, Save, Download, BookOpen, Target, FileText, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -130,12 +130,15 @@ ${generatedNote.conclusion}
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">AI Lesson Note Generator</h2>
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">AI Lesson Note Generator</h2>
+        <p className="text-gray-600">Create comprehensive, well-structured lesson notes instantly with AI</p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-medium text-blue-900 mb-2 flex items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-5 shadow-sm">
+            <h3 className="font-semibold text-blue-900 mb-2 flex items-center text-lg">
               <Sparkles className="w-5 h-5 mr-2" />
               Generate with AI
             </h3>
@@ -144,133 +147,184 @@ ${generatedNote.conclusion}
             </p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Subject *
-            </label>
-            <select
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Subject *
+              </label>
+              <select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                <option value="">Select a subject</option>
+                {SUBJECTS.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Grade Level *
+              </label>
+              <select
+                value={gradeLevel}
+                onChange={(e) => setGradeLevel(e.target.value)}
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                <option value="">Select grade level</option>
+                {GRADE_LEVELS.map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Topic *
+              </label>
+              <input
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="e.g., Cell Division"
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Subtopic (Optional)
+              </label>
+              <input
+                type="text"
+                value={subtopic}
+                onChange={(e) => setSubtopic(e.target.value)}
+                placeholder="e.g., Mitosis and Meiosis"
+                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              />
+            </div>
+
+            <button
+              onClick={handleGenerate}
+              disabled={generating || !subject || !gradeLevel || !topic}
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3.5 rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-md transition-all"
             >
-              <option value="">Select a subject</option>
-              {SUBJECTS.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+              <Sparkles className="w-5 h-5" />
+              <span>{generating ? 'Generating...' : 'Generate Lesson Note'}</span>
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Grade Level *
-            </label>
-            <select
-              value={gradeLevel}
-              onChange={(e) => setGradeLevel(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Select grade level</option>
-              {GRADE_LEVELS.map(g => (
-                <option key={g} value={g}>{g}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Topic *
-            </label>
-            <input
-              type="text"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., Cell Division"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Subtopic (Optional)
-            </label>
-            <input
-              type="text"
-              value={subtopic}
-              onChange={(e) => setSubtopic(e.target.value)}
-              placeholder="e.g., Mitosis and Meiosis"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <button
-            onClick={handleGenerate}
-            disabled={generating || !subject || !gradeLevel || !topic}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>{generating ? 'Generating...' : 'Generate Lesson Note'}</span>
-          </button>
         </div>
 
-        <div>
+        <div className="lg:col-span-3">
           {generatedNote ? (
-            <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-900">{generatedNote.title}</h3>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={handleDownload}
-                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Download"
-                  >
-                    <Download className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>{saving ? 'Saving...' : 'Save'}</span>
-                  </button>
+            <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-1">{generatedNote.title}</h3>
+                    <div className="flex items-center space-x-3 text-blue-100 text-sm">
+                      <span>{subject}</span>
+                      <span>•</span>
+                      <span>{gradeLevel}</span>
+                      <span>•</span>
+                      <span className="flex items-center">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        AI Generated
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleDownload}
+                      className="p-2.5 text-white hover:bg-white/20 rounded-lg transition-colors"
+                      title="Download"
+                    >
+                      <Download className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center space-x-2 px-4 py-2.5 bg-white text-blue-600 rounded-lg hover:bg-blue-50 disabled:opacity-50 transition-colors font-semibold shadow-md"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{saving ? 'Saving...' : 'Save'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Objectives</h4>
-                  <ul className="list-disc list-inside space-y-1">
+              <div className="p-6 space-y-6 max-h-[700px] overflow-y-auto">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-5">
+                  <div className="flex items-center mb-3">
+                    <div className="bg-green-600 p-2 rounded-lg mr-3">
+                      <Target className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold text-green-900">Learning Objectives</h4>
+                  </div>
+                  <ul className="space-y-2">
                     {generatedNote.objectives.map((obj: string, i: number) => (
-                      <li key={i} className="text-gray-700 text-sm">{obj}</li>
+                      <li key={i} className="flex items-start">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 leading-relaxed">{obj}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Introduction</h4>
-                  <p className="text-gray-700 text-sm whitespace-pre-wrap">{generatedNote.introduction}</p>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
+                  <div className="flex items-center mb-3">
+                    <div className="bg-blue-600 p-2 rounded-lg mr-3">
+                      <BookOpen className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold text-blue-900">Introduction</h4>
+                  </div>
+                  <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{generatedNote.introduction}</p>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Content</h4>
-                  <p className="text-gray-700 text-sm whitespace-pre-wrap">{generatedNote.content}</p>
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-5">
+                  <div className="flex items-center mb-3">
+                    <div className="bg-purple-600 p-2 rounded-lg mr-3">
+                      <FileText className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold text-purple-900">Main Content</h4>
+                  </div>
+                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed prose prose-sm max-w-none">
+                    {generatedNote.content}
+                  </div>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Evaluation</h4>
-                  <p className="text-gray-700 text-sm whitespace-pre-wrap">{generatedNote.evaluation}</p>
+                <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-5">
+                  <div className="flex items-center mb-3">
+                    <div className="bg-orange-600 p-2 rounded-lg mr-3">
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold text-orange-900">Evaluation</h4>
+                  </div>
+                  <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{generatedNote.evaluation}</p>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Conclusion</h4>
-                  <p className="text-gray-700 text-sm whitespace-pre-wrap">{generatedNote.conclusion}</p>
+                <div className="bg-gradient-to-br from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-xl p-5">
+                  <div className="flex items-center mb-3">
+                    <div className="bg-teal-600 p-2 rounded-lg mr-3">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold text-teal-900">Conclusion</h4>
+                  </div>
+                  <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{generatedNote.conclusion}</p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-              <Sparkles className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Generated lesson note will appear here</p>
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-16 text-center h-full flex items-center justify-center shadow-inner">
+              <div>
+                <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-10 h-10 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Lesson Note Yet</h3>
+                <p className="text-gray-600">Fill in the form and click generate to create your lesson note</p>
+              </div>
             </div>
           )}
         </div>
